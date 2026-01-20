@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <title>Frizerie - Acasă</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; background-color: #f4f4f4; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .card { background: white; border: 1px solid #ddd; padding: 20px; margin-bottom: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .btn { background-color: #333; color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px; display: inline-block; margin-top: 10px; }
+        .btn:hover { background-color: #555; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Barber Book ✂️</h1>
+    <h3>Alege un profesionist:</h3>
+
+    <div id="lista-frizeri">
+        <p>Se conectează la server...</p>
+    </div>
+</div>
+
+<script>
+    // Cerem lista de frizeri
+    fetch('/api/barbers')
+        .then(response => {
+            if (!response.ok) throw new Error("Nu pot conecta la server");
+            return response.json();
+        })
+        .then(data => {
+            const container = document.getElementById('lista-frizeri');
+            container.innerHTML = ''; // Golim mesajul de incarcare
+
+            if(data.length === 0) {
+                container.innerHTML = "<p>Nu există frizeri în baza de date.</p>";
+                return;
+            }
+
+            data.forEach(frizer => {
+                const div = document.createElement('div');
+                div.className = 'card';
+                div.innerHTML = `
+                        <h2>${frizer.name}</h2>
+                        <p>${frizer.description || 'Expert în styling masculin.'}</p>
+                        <a href="profile.html?id=${frizer.id}" class="btn">Vezi Profil & Servicii</a>
+                    `;
+                container.appendChild(div);
+            });
+        })
+        .catch(err => {
+            document.getElementById('lista-frizeri').innerHTML =
+                `<p style="color:red">Eroare: Serverul nu răspunde. Roagă colegul să pornească aplicația!</p>`;
+        });
+</script>
+</body>
+</html>

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8">
+  <title>Alege Ora</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; text-align: center; }
+    input[type=date] { padding: 10px; font-size: 16px; margin: 20px 0; }
+    .grid-ore { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+    .btn-ora { padding: 10px 20px; background: #007bff; color: white; border: none; cursor: pointer; border-radius: 5px; }
+    .btn-ora:hover { background: #0056b3; }
+  </style>
+</head>
+<body>
+<h1>Pasul 2: Alege Data și Ora</h1>
+
+<label>Selectează data:</label><br>
+<input type="date" id="date-picker">
+
+<div id="mesaj-status"></div>
+<div class="grid-ore" id="container-ore"></div>
+
+<script>
+  const params = new URLSearchParams(window.location.search);
+  const barberId = params.get('barberId');
+  const serviceId = params.get('serviceId');
+
+  const dateInput = document.getElementById('date-picker');
+  const container = document.getElementById('container-ore');
+
+  dateInput.addEventListener('change', function() {
+    const dataAleasa = this.value;
+    container.innerHTML = '';
+    document.getElementById('mesaj-status').innerText = "Caut ore disponibile...";
+
+    // Facem request la backend
+    fetch(`/api/barbers/${barberId}/availability?date=${dataAleasa}&serviceId=${serviceId}`)
+            .then(res => res.json())
+            .then(oreDisponibile => {
+              document.getElementById('mesaj-status').innerText = "";
+
+              if(oreDisponibile.length === 0) {
+                document.getElementById('mesaj-status').innerText = "Nu sunt locuri libere pe această dată.";
+                return;
+              }
+
+              oreDisponibile.forEach(ora => {
+                const btn = document.createElement('button');
+                btn.className = 'btn-ora';
+                btn.innerText = ora; // ex: "10:00"
+
+                // Cand dai click pe ora, mergi la confirmare
+                btn.onclick = () => {
+                  window.location.href = `confirm.html?barberId=${barberId}&serviceId=${serviceId}&date=${dataAleasa}&time=${ora}`;
+                };
+                container.appendChild(btn);
+              });
+            })
+            .catch(err => {
+              // Fallback (de siguranță, în caz că nu e gata endpointul de availability)
+              console.warn("API availability nu merge, arăt ore demo", err);
+              alert("Backend-ul nu a raspuns cu orele. Verificati consola.");
+            });
+  });
+</script>
+</body>
+</html>

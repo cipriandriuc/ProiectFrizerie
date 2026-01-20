@@ -1,12 +1,11 @@
 plugins {
 	id 'java'
-	id 'org.springframework.boot' version '3.5.7'
-	id 'io.spring.dependency-management' version '1.1.7'
+	id 'org.springframework.boot' version '3.2.2'
+	id 'io.spring.dependency-management' version '1.1.4'
 }
 
 group = 'com.example'
 version = '0.0.1-SNAPSHOT'
-description = 'Aplicatie pentru gestionarea programarilor la frizerie'
 
 java {
 	toolchain {
@@ -25,13 +24,19 @@ repositories {
 }
 
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	// 1. Necesar pentru WEB (Server, HTML, REST API)
 	implementation 'org.springframework.boot:spring-boot-starter-web'
-	compileOnly 'org.projectlombok:lombok'
+
+	// 2. Necesar pentru Baza de Date
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	runtimeOnly 'com.mysql:mysql-connector-j'
+
+	// 3. Utilitare (Lombok pentru a scrie mai putin cod)
+	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
+
+	// 4. Teste
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
 tasks.named('test') {

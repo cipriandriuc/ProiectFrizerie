@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <title>Profil Frizer</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; }
+        .service-item { border-bottom: 1px solid #ccc; padding: 15px 0; display: flex; justify-content: space-between; align-items: center; }
+        .btn-book { background-color: #28a745; color: white; border: none; padding: 8px 12px; cursor: pointer; text-decoration: none; border-radius: 4px; }
+    </style>
+</head>
+<body>
+<a href="index.html">← Înapoi la listă</a>
+<h1 id="nume-frizer">Se încarcă...</h1>
+
+<h3>Servicii Disponibile:</h3>
+<div id="lista-servicii"></div>
+
+<script>
+    const params = new URLSearchParams(window.location.search);
+    const barberId = params.get('id');
+
+    fetch(`/api/barbers/${barberId}`)
+        .then(res => res.json())
+        .then(frizer => {
+            document.getElementById('nume-frizer').innerText = "Profil: " + frizer.name;
+
+            const container = document.getElementById('lista-servicii');
+            // Dacă backend-ul trimite serviciile direct în obiectul frizer:
+            const servicii = frizer.services || [];
+
+            if(servicii.length === 0) container.innerHTML = "<p>Acest frizer nu are servicii configurate.</p>";
+
+            servicii.forEach(s => {
+                const div = document.createElement('div');
+                div.className = 'service-item';
+                div.innerHTML = `
+                        <div>
+                            <strong>${s.name}</strong> <br>
+                            <small>Preț: ${s.price} RON | Durată: ${s.duration} min</small>
+                        </div>
+                        <a href="booking.html?barberId=${frizer.id}&serviceId=${s.id}" class="btn-book">Rezervă</a>
+                    `;
+                container.appendChild(div);
+            });
+        });
+</script>
+</body>
+</html>

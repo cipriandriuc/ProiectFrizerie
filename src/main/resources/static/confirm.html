@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <title>Finalizare</title>
+    <style>
+        body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background: #f9f9f9; }
+        form { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 300px; }
+        input { width: 100%; padding: 10px; margin: 10px 0; box-sizing: border-box; }
+        button { width: 100%; padding: 10px; background: green; color: white; border: none; cursor: pointer; font-size: 16px; }
+    </style>
+</head>
+<body>
+<form id="booking-form">
+    <h2>Confirmare</h2>
+    <p id="rezumat"></p>
+
+    <input type="text" id="nume" placeholder="Numele tău complet" required>
+    <input type="tel" id="telefon" placeholder="Număr de telefon" required>
+
+    <button type="submit">TRIMITE PROGRAMAREA</button>
+</form>
+
+<script>
+    const params = new URLSearchParams(window.location.search);
+    const barberId = params.get('barberId');
+    const serviceId = params.get('serviceId');
+    const date = params.get('date');
+    const time = params.get('time');
+
+    document.getElementById('rezumat').innerHTML = `Dată: <b>${date}</b> <br> Ora: <b>${time}</b>`;
+
+    document.getElementById('booking-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const payload = {
+            clientName: document.getElementById('nume').value,
+            phoneNumber: document.getElementById('telefon').value,
+            appointmentTime: `${date}T${time}:00`, // Formatul cerut de Java LocalDateTime
+            barber: { id: parseInt(barberId) },
+            service: { id: parseInt(serviceId) }
+        };
+
+        fetch('/api/appointments', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        })
+            .then(response => {
+                if(response.ok) {
+                    alert("✅ Programare reușită! Te așteptăm.");
+                    window.location.href = 'index.html';
+                } else {
+                    alert("❌ Ceva nu a mers bine la server.");
+                }
+            });
+    });
+</script>
+</body>
+</html>
