@@ -18,8 +18,11 @@ public class ServiceController {
     }
 
     @GetMapping
-    public List<Service> getAllServices() {
-        return serviceRepository.findAll();
+    public List<Service> getServices(@RequestParam(required = false) Long barberId) {
+        if (barberId == null) {
+            return serviceRepository.findAll();
+        }
+        return serviceRepository.findByBarberId(barberId);
     }
 
     @PostMapping
