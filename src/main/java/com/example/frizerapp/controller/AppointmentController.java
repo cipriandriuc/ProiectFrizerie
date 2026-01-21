@@ -6,8 +6,19 @@ import com.example.frizerapp.repository.AppointmentRepository;
 import com.example.frizerapp.repository.ServiceRepository;
 import org.springframework.web.bind.annotation.*;
 
+import com.example.frizerapp.repository.BarberRepository;
+import com.example.frizerapp.model.Barber;
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
+import com.example.frizerapp.dto.AppointmentCreateRequestNested;
+
+
+
 import java.time.LocalDateTime;
 import java.util.List;
+
+
 
 @RestController
 @RequestMapping("/api/appointments")
@@ -16,44 +27,53 @@ public class AppointmentController {
 
     private final AppointmentRepository appointmentRepository;
     private final ServiceRepository serviceRepository;
+    private final BarberRepository barberRepository;
+
 
     public AppointmentController(AppointmentRepository appointmentRepository,
-                                 ServiceRepository serviceRepository) {
+                                 ServiceRepository serviceRepository,
+                                 BarberRepository barberRepository) {
         this.appointmentRepository = appointmentRepository;
         this.serviceRepository = serviceRepository;
+        this.barberRepository = barberRepository;
     }
-
     @GetMapping
     public List<Appointment> getAllAppointments() {
         return appointmentRepository.findAll();
     }
 
     @PostMapping
-    public Object addAppointment(@RequestBody Appointment appointment) {
+    public Appointment addAppointment(@Valid @RequestBody AppointmentCreateRequestNested req) {
 
-        // 1. Luăm serviciul ca să știm durata
-        Service service = serviceRepository.findById(appointment.getService().getId())
-                .orElseThrow(() -> new RuntimeException("Service not found"));
+        Barber barber = barberRepository.findById(req.barber().id())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Barber not found"));
 
-        int duration = service.getDuration(); // durata serviciului în minute
+        Service service = serviceRepository.findById(req.service().id())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Service not found"));
 
-        // 2. Calculăm intervalul de timp al programării
-        LocalDateTime start = appointment.getAppointmentTime();
-        LocalDateTime end = start.plusMinutes(duration);
+        LocalDateTime start = req.appointmentTime();
+        LocalDateTime end = start.plusMinutes(service.getDuration());
 
-        // 3. Verificăm dacă frizerul e liber
         List<Appointment> overlappingAppointments =
                 appointmentRepository.findByBarberIdAndAppointmentTimeBetween(
-                        appointment.getBarber().getId(),
+                        barber.getId(),
                         start,
                         end
                 );
 
         if (!overlappingAppointments.isEmpty()) {
-            return "Barber is not available at this time. Choose another hour.";
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "Barber is not available at this time. Choose another hour.");
         }
 
-        // 4. Salvează programarea
+        Appointment appointment = new Appointment();
+        appointment.setBarber(barber);
+        appointment.setService(service);
+        appointment.setAppointmentTime(start);
+        appointment.setClientName(req.clientName());
+        appointment.setPhoneNumber(req.phoneNumber());
+
         return appointmentRepository.save(appointment);
     }
+
 }

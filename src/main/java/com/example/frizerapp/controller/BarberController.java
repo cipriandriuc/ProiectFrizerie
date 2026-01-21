@@ -16,6 +16,10 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.example.frizerapp.dto.BarberProfileResponse;
+import com.example.frizerapp.dto.ServiceResponse;
+
+
 @RestController
 @RequestMapping("/api/barbers")
 @CrossOrigin(origins = "*")
@@ -106,4 +110,30 @@ public class BarberController {
         return barberRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Barber not found with id " + id));
     }
+    // Profile endpoint (fara poze): barber + servicii lui intr-un singur JSON
+    @GetMapping("/{id}/profile")
+    public BarberProfileResponse getBarberProfile(@PathVariable Long id) {
+        Barber barber = barberRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Barber not found with id " + id));
+
+        List<ServiceResponse> services = serviceRepository.findByBarberId(id)
+                .stream()
+                .map(s -> new ServiceResponse(
+                        s.getId(),
+                        s.getName(),
+                        s.getPrice(),
+                        s.getDuration()
+                ))
+                .toList();
+
+        return new BarberProfileResponse(
+                barber.getId(),
+                barber.getName(),
+                barber.getPhone(),
+                barber.getEmail(),
+                barber.getDescription(),
+                services
+        );
+    }
+
 }
