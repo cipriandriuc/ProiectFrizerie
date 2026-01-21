@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <title>Profil Frizer</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
+        .service-card { background: white; border: 1px solid #ddd; border-radius: 8px; padding: 20px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
+        .btn-book { background: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; }
+    </style>
+</head>
+<body>
+<div id="header"></div>
+<hr>
+<h3>Servicii Disponibile</h3>
+<div id="services-list"></div>
+
+<script>
+    const barberId = new URLSearchParams(window.location.search).get('id');
+    fetch(`/api/barbers/${barberId}/profile`)
+        .then(res => res.json())
+        .then(data => {
+            document.getElementById('header').innerHTML = `<h1>${data.name}</h1><p>${data.description}</p>`;
+            const list = document.getElementById('services-list');
+            data.services.forEach(s => {
+                list.innerHTML += `
+                        <div class="service-card">
+                            <div><strong>${s.name}</strong><br>${s.price} RON | ${s.duration} min</div>
+                            <button class="btn-book" onclick="location.href='booking.html?barberId=${barberId}&serviceId=${s.id}'">Rezervă</button>
+                        </div>`;
+            });
+        });
+</script>
+</body>
+</html>

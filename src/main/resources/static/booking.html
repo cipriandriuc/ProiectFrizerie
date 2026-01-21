@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <title>Alege Ora</title>
+</head>
+<body>
+<h1>Pasul 1: Alege data</h1>
+<input type="date" id="datePicker" onchange="getSlots()">
+<div id="slots" style="margin-top: 30px;"></div>
+
+<script>
+    const params = new URLSearchParams(window.location.search);
+    const bId = params.get('barberId');
+    const sId = params.get('serviceId');
+
+    async function getSlots() {
+        const date = document.getElementById('datePicker').value;
+        const res = await fetch(`/api/barbers/${bId}/availability?date=${date}&serviceId=${sId}`);
+        const slots = await res.json();
+
+        const container = document.getElementById('slots');
+        container.innerHTML = slots.map(time =>
+            `<button style="padding:10px; margin:5px;" onclick="selectTime('${date}T${time}:00')">${time}</button>`
+        ).join('');
+    }
+
+    function selectTime(dateTime) {
+        location.href = `confirm.html?barberId=${bId}&serviceId=${sId}&time=${dateTime}`;
+    }
+</script>
+</body>
+</html>

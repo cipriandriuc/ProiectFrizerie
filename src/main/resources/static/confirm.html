@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <title>Finalizare Rezervare</title>
+</head>
+<body>
+<h1>Datele tale de contact</h1>
+<form id="appointmentForm">
+    <input type="text" id="clientName" placeholder="Numele tău" required><br><br>
+    <input type="tel" id="phoneNumber" placeholder="Număr de telefon" required><br><br>
+    <button type="submit" style="background: black; color: white; padding: 15px;">Confirmă Programarea</button>
+</form>
+
+<script>
+    const params = new URLSearchParams(window.location.search);
+
+    document.getElementById('appointmentForm').onsubmit = async (e) => {
+        e.preventDefault();
+
+        // Construim JSON-ul conform record-ului tau AppointmentCreateRequestNested
+        const payload = {
+            clientName: document.getElementById('clientName').value,
+            phoneNumber: document.getElementById('phoneNumber').value,
+            appointmentTime: params.get('time'),
+            barber: { id: parseInt(params.get('barberId')) },
+            service: { id: parseInt(params.get('serviceId')) }
+        };
+
+        const response = await fetch('/api/appointments', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        if (response.ok) {
+            alert("Programare reușită! Te așteptăm!");
+            location.href = 'index.html';
+        } else {
+            const error = await response.text();
+            alert("Eroare: " + error);
+        }
+    };
+</script>
+</body>
+</html>

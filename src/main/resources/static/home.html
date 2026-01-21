@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <title>Frizeri - F1rst Barbershop</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #f4f4f4; padding: 40px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px; }
+        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center; transition: 0.3s; }
+        .card:hover { transform: translateY(-5px); }
+        .btn-profile { display: block; margin-top: 15px; background: #1a1a1a; color: white; padding: 10px; text-decoration: none; border-radius: 6px; }
+    </style>
+</head>
+<body>
+<h1 style="text-align:center;">Echipa noastră</h1>
+<div id="barber-list" class="grid"></div>
+
+<script>
+    fetch('/api/barbers')
+        .then(res => res.json())
+        .then(data => {
+            const list = document.getElementById('barber-list');
+            data.forEach(b => {
+                list.innerHTML += `
+                        <div class="card">
+                            <h3>${b.name}</h3>
+                            <p>${b.description || 'Specialist'}</p>
+                            <a href="profile.html?id=${b.id}" class="btn-profile">Vezi profil</a>
+                        </div>`;
+            });
+        });
+</script>
+</body>
+</html>
